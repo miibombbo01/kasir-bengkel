@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kasir & Target Toko Ban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kasir Toko Ban Moto Expert</title>
   <style>
     * {
       box-sizing: border-box;
@@ -41,10 +41,11 @@
     }
 
     .shop-title {
-      font-size: 14px;
+      font-size: 13px;
       color: #94a3b8;
       text-transform: uppercase;
       letter-spacing: 1px;
+      font-weight: 600;
     }
 
     .target-box {
@@ -71,10 +72,10 @@
     }
 
     .progress-bar-fill {
-      width: 61.6%; /* Contoh: 185 dari 300 pcs */
       height: 100%;
       background: linear-gradient(90deg, #10b981, #34d399);
       border-radius: 5px;
+      transition: width 0.3s ease;
     }
 
     .stats-row {
@@ -106,7 +107,7 @@
     .content-area {
       padding: 20px;
       flex: 1;
-      padding-bottom: 90px;
+      padding-bottom: 100px;
     }
 
     .section-title {
@@ -114,6 +115,9 @@
       font-weight: 600;
       margin-bottom: 12px;
       color: #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .tx-card {
@@ -125,6 +129,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      cursor: pointer;
     }
 
     .tx-details h4 {
@@ -142,14 +147,17 @@
       font-weight: 700;
       font-size: 14px;
       color: #0f172a;
+      text-align: right;
     }
 
     /* Fixed Floating Button */
     .action-bottom {
-      position: absolute;
+      position: fixed;
       bottom: 20px;
-      left: 20px;
-      right: 20px;
+      width: calc(100% - 40px);
+      max-width: 440px;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .btn-add {
@@ -169,7 +177,7 @@
       gap: 8px;
     }
 
-    /* Modal Struk Nota (Style E-Wallet) */
+    /* Modal Sheet Styling */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -179,11 +187,185 @@
       background: rgba(0,0,0,0.6);
       display: flex;
       justify-content: center;
-      align-items: center;
-      padding: 20px;
+      align-items: flex-end;
       z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
     }
 
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-sheet {
+      background: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 24px;
+      max-height: 85vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-sheet {
+      transform: translateY(0);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: #ffffff;
+    }
+
+    /* GRID BERDAMPINGAN NO PLAT & NO HP */
+    .grid-2-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* NOTION STYLE BOARD FOR ITEM INPUT */
+    .notion-item-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .notion-item-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .notion-select {
+      flex: 1;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 13px;
+      background: #ffffff;
+      color: #0f172a;
+      outline: none;
+    }
+
+    /* Stepper Button (< 1 >) */
+    .stepper-box {
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .btn-step {
+      width: 32px;
+      height: 32px;
+      background-color: #f1f5f9;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      color: #0f172a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      transition: transform 0.1s ease, background-color 0.15s ease;
+    }
+
+    .btn-step:active:not(:disabled) {
+      transform: scale(0.88);
+      background-color: #e2e8f0;
+    }
+
+    .btn-step:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .step-val {
+      font-size: 14px;
+      font-weight: 700;
+      width: 22px;
+      text-align: center;
+      color: #0f172a;
+    }
+
+    /* Sub-board Tambah Item */
+    .btn-sub-board {
+      width: 100%;
+      background: #f1f5f9;
+      border: 1px dashed #94a3b8;
+      color: #334155;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 6px;
+      transition: transform 0.1s ease, background 0.15s ease;
+    }
+
+    .btn-sub-board:active {
+      transform: scale(0.98);
+      background: #e2e8f0;
+    }
+
+    /* Total Harga Card Box */
+    .total-price-box {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background-color: #16a34a;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 14px;
+      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
+    }
+
+    /* Modal Struk Nota */
     .receipt-card {
       background: #ffffff;
       width: 100%;
@@ -192,7 +374,7 @@
       padding: 24px;
       box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
       text-align: center;
-      position: relative;
+      margin: auto;
     }
 
     .badge-success {
@@ -206,18 +388,6 @@
       justify-content: center;
       font-size: 24px;
       margin: 0 auto 12px auto;
-    }
-
-    .receipt-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #0f172a;
-    }
-
-    .receipt-time {
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 4px;
     }
 
     .receipt-divider {
@@ -266,10 +436,10 @@
       <div class="target-box">
         <div class="target-info">
           <span>Target Ban Keluar</span>
-          <strong>185 / 300 Pcs</strong>
+          <strong id="targetText">0 / 300 Pcs</strong>
         </div>
         <div class="progress-bar-bg">
-          <div class="progress-bar-fill"></div>
+          <div class="progress-bar-fill" id="progressBar" style="width: 0%;"></div>
         </div>
       </div>
 
@@ -277,99 +447,343 @@
       <div class="stats-row">
         <div class="stat-item">
           <span class="stat-label">Penjualan Hari Ini</span>
-          <span class="stat-value">5 Pcs</span>
+          <span class="stat-value" id="todayPcs">0 Pcs</span>
         </div>
         <div class="stat-item" style="text-align: right;">
           <span class="stat-label">Total Omzet Hari Ini</span>
-          <span class="stat-value">Rp 2.115.000</span>
+          <span class="stat-value" id="todayOmzet">Rp 0</span>
         </div>
       </div>
     </div>
 
     <!-- Riwayat Transaksi -->
     <div class="content-area">
-      <div class="section-title">Riwayat Transaksi Hari Ini</div>
-
-      <!-- Item Transaksi 1 -->
-      <div class="tx-card">
-        <div class="tx-details">
-          <h4>KH 2163 MJ (1 Pcs)</h4>
-          <p>110/70-14 IRC SCT-005F TL</p>
-        </div>
-        <div class="tx-price">Rp 750.000</div>
+      <div class="section-title">
+        <span>Riwayat Transaksi</span>
+        <button onclick="exportCSV()" style="font-size: 11px; background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer;">Export Excel</button>
       </div>
-
-      <!-- Item Transaksi 2 -->
-      <div class="tx-card">
-        <div class="tx-details">
-          <h4>KH 4859 MH (1 Pcs)</h4>
-          <p>110/70-13 Exato IRC</p>
-        </div>
-        <div class="tx-price">Rp 195.000</div>
-      </div>
-
-      <!-- Item Transaksi 3 -->
-      <div class="tx-card">
-        <div class="tx-details">
-          <h4>DA 4979 MI (1 Pcs)</h4>
-          <p>130/70-13 SCT007</p>
-        </div>
-        <div class="tx-price">Rp 400.000</div>
-      </div>
+      <div id="txList"></div>
     </div>
 
-    <!-- Tombol Tambah Transaksi -->
+    <!-- Tombol Utama Tambah Transaksi -->
     <div class="action-bottom">
-      <button class="btn-add" onclick="toggleModal(true)">
+      <button class="btn-add" onclick="openFormModal()">
         <span>+</span> Transaksi Baru
       </button>
     </div>
+  </div>
 
-    <!-- Modal Nota Digital (Style E-Wallet) -->
-    <div class="modal-overlay" id="receiptModal" style="display: none;">
-      <div class="receipt-card">
-        <div class="badge-success">✓</div>
-        <div class="receipt-title">Transaksi Berhasil</div>
-        <div class="receipt-time">Rabu, 05 Ags 2026 • 14:20 WITA</div>
+  <!-- MODAL FORM INPUT TRANSAKSI -->
+  <div class="modal-overlay" id="formModal">
+    <div class="modal-sheet">
+      <h3 style="margin-bottom: 16px; color: #0f172a;">Input Penjualan Ban</h3>
+
+      <!-- BOARD CONTAINER KELOMPOK BAN -->
+      <div class="form-group">
+        <label class="form-label">Daftar Barang</label>
+        <div id="itemBoardContainer">
+          <!-- Item Card akan ter-generate otomatis -->
+        </div>
+
+        <!-- SUB BOARD TOMBOL TAMBAH ITEM -->
+        <button class="btn-sub-board" onclick="addItemBoard()">
+          <span>+</span> Tambahkan item
+        </button>
+      </div>
+
+      <!-- GRID BERDAMPINGAN: NO PLAT & NO HP -->
+      <div class="form-group grid-2-col">
+        <div>
+          <label class="form-label">No. Plat</label>
+          <input type="text" class="form-control" id="inputPlat" placeholder="KH 2163 MJ" style="text-transform: uppercase;">
+        </div>
+        <div>
+          <label class="form-label">No. Telepon</label>
+          <!-- KEYBOARD NOKIA / NUMPAD DENGAN inputmode="numeric" -->
+          <input type="tel" inputmode="numeric" pattern="[0-9]*" class="form-control" id="inputHp" placeholder="085386379179">
+        </div>
+      </div>
+
+      <!-- KOLOM HARGA OTOMATIS -->
+      <div class="form-group">
+        <label class="form-label">Total Harga (Otomatis)</label>
+        <div class="total-price-box">
+          <span style="font-size: 13px; color: #64748b; font-weight: 600;">Total Pembayaran:</span>
+          <strong id="formGrandTotal" style="font-size: 18px; color: #2563eb;">Rp 0</strong>
+        </div>
+      </div>
+
+      <!-- TOMBOL PAYMENT -->
+      <button class="btn-submit" onclick="submitTransaction()">Proses Payment & Nota</button>
+      <button onclick="closeFormModal()" style="width:100%; background:none; border:none; padding:12px; color:#64748b; margin-top:4px; font-weight:600;">Batal</button>
+    </div>
+  </div>
+
+  <!-- MODAL STRUK NOTA -->
+  <div class="modal-overlay" id="receiptModal" style="align-items: center;">
+    <div class="receipt-card">
+      <div class="badge-success">✓</div>
+      <h3 style="color: #0f172a;">Transaksi Berhasil</h3>
+      <div id="receiptTime" style="font-size: 12px; color: #64748b; margin-top: 4px;"></div>
+
+      <div class="receipt-divider"></div>
+
+      <div class="receipt-items">
+        <div class="receipt-row">
+          <span style="color: #64748b;">No. Plat:</span>
+          <strong id="receiptPlat">-</strong>
+        </div>
+        <div class="receipt-row">
+          <span style="color: #64748b;">No. HP:</span>
+          <span id="receiptHp">-</span>
+        </div>
+        
+        <div class="receipt-divider"></div>
+
+        <div id="receiptBanList"></div>
 
         <div class="receipt-divider"></div>
 
-        <div class="receipt-items">
-          <div class="receipt-row">
-            <span style="color: #64748b;">No. Plat:</span>
-            <strong>KH 2163 MJ</strong>
-          </div>
-          <div class="receipt-row">
-            <span style="color: #64748b;">No. HP:</span>
-            <span>085386379179</span>
-          </div>
-          
-          <div class="receipt-divider"></div>
-
-          <div class="receipt-row">
-            <span>110/70-14 IRC SCT-005F TL (x1)</span>
-            <span>Rp 750.000</span>
-          </div>
-
-          <div class="receipt-divider"></div>
-
-          <div class="receipt-row bold">
-            <span>TOTAL PEMBAYARAN</span>
-            <span style="color: #2563eb;">Rp 750.000</span>
-          </div>
+        <div class="receipt-row bold">
+          <span>TOTAL PEMBAYARAN</span>
+          <span style="color: #2563eb;" id="receiptTotal">Rp 0</span>
         </div>
-
-        <button class="btn-close-receipt" onclick="toggleModal(false)">Tutup Nota</button>
       </div>
-    </div>
 
+      <button class="btn-close-receipt" onclick="closeReceiptModal()">Selesai & Tutup</button>
+    </div>
   </div>
 
   <script>
-    function toggleModal(show) {
-      document.getElementById('receiptModal').style.display = show ? 'flex' : 'none';
+    const BAN_DATABASE = [
+      { name: '110/70-14 IRC SCT-005F TL', price: 750000 },
+      { name: '140/70-14 IRC SCT-005R TL', price: 470000 },
+      { name: '80/90-14 SS560F TT IRC', price: 195000 },
+      { name: '110/70-13 Exato IRC', price: 325000 },
+      { name: '130/70-13 Exato IRC', price: 400000 },
+      { name: '100/90-12 MDB86 IRC', price: 265000 },
+      { name: '90/90-14 SS-530R IRC', price: 235000 },
+      { name: '130/70-13 SCT007', price: 400000 },
+      { name: '140/70-14 SCT005R', price: 470000 }
+    ];
+
+    let transactions = JSON.parse(localStorage.getItem('ban_transactions')) || [
+      { id: 1, date: '05/08/2026 14:10', plat: 'KH 2163 MJ', hp: '085386379179', items: [{ ban: '110/70-14 IRC SCT-005F TL', qty: 1, price: 750000 }], total: 750000, totalQty: 1 },
+      { id: 2, date: '05/08/2026 14:15', plat: 'KH 4859 MH', hp: '082259531811', items: [{ ban: '110/70-13 Exato IRC', qty: 1, price: 195000 }], total: 195000, totalQty: 1 },
+      { id: 3, date: '05/08/2026 14:20', plat: 'DA 4979 MI', hp: '085355698070', items: [{ ban: '130/70-13 SCT007', qty: 1, price: 400000 }], total: 400000, totalQty: 1 }
+    ];
+
+    let itemCardCounter = 0;
+
+    function renderApp() {
+      const txList = document.getElementById('txList');
+      txList.innerHTML = '';
+
+      let totalPcs = 0;
+      let totalOmzet = 0;
+
+      transactions.forEach(tx => {
+        totalPcs += Number(tx.totalQty);
+        totalOmzet += Number(tx.total);
+
+        const card = document.createElement('div');
+        card.className = 'tx-card';
+        card.onclick = () => showReceipt(tx);
+        
+        const summaryText = tx.items.map(i => `${i.ban} (x${i.qty})`).join(', ');
+
+        card.innerHTML = `
+          <div class="tx-details">
+            <h4>${tx.plat} (${tx.totalQty} Pcs)</h4>
+            <p>${summaryText}</p>
+          </div>
+          <div class="tx-price">Rp ${Number(tx.total).toLocaleString('id-ID')}</div>
+        `;
+        txList.prepend(card);
+      });
+
+      document.getElementById('targetText').innerText = `${totalPcs} / 300 Pcs`;
+      const targetPercent = Math.min((totalPcs / 300) * 100, 100);
+      document.getElementById('progressBar').style.width = `${targetPercent}%`;
+
+      document.getElementById('todayPcs').innerText = `${totalPcs} Pcs`;
+      document.getElementById('todayOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
+
+      localStorage.setItem('ban_transactions', JSON.stringify(transactions));
     }
+
+    function addItemBoard() {
+      itemCardCounter++;
+      const id = itemCardCounter;
+
+      const card = document.createElement('div');
+      card.className = 'notion-item-card';
+      card.id = `itemBoard_${id}`;
+
+      let optionsHTML = '<option value="">-- Pilih Jenis Ban --</option>';
+      BAN_DATABASE.forEach(b => {
+        optionsHTML += `<option value="${b.name}" data-price="${b.price}">${b.name}</option>`;
+      });
+
+      card.innerHTML = `
+        <div class="notion-item-row">
+          <select class="notion-select" id="selectBan_${id}" onchange="updateFormTotal()">
+            ${optionsHTML}
+          </select>
+
+          <div class="stepper-box">
+            <button class="btn-step" id="btnMinus_${id}" onclick="changeQty(${id}, -1)" disabled>&lt;</button>
+            <span class="step-val" id="qtyVal_${id}">1</span>
+            <button class="btn-step" id="btnPlus_${id}" onclick="changeQty(${id}, 1)">&gt;</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('itemBoardContainer').appendChild(card);
+      updateFormTotal();
+    }
+
+    function changeQty(id, change) {
+      const qtyElem = document.getElementById(`qtyVal_${id}`);
+      let currentQty = parseInt(qtyElem.innerText);
+      currentQty += change;
+
+      if (currentQty < 1) currentQty = 1;
+      if (currentQty > 15) currentQty = 15;
+
+      qtyElem.innerText = currentQty;
+
+      document.getElementById(`btnMinus_${id}`).disabled = (currentQty === 1);
+      document.getElementById(`btnPlus_${id}`).disabled = (currentQty === 15);
+
+      updateFormTotal();
+    }
+
+    function updateFormTotal() {
+      let grandTotal = 0;
+      const cards = document.querySelectorAll('.notion-item-card');
+
+      cards.forEach(card => {
+        const id = card.id.replace('itemBoard_', '');
+        const select = document.getElementById(`selectBan_${id}`);
+        const qty = parseInt(document.getElementById(`qtyVal_${id}`).innerText);
+
+        if (select && select.selectedIndex > 0) {
+          const price = parseInt(select.options[select.selectedIndex].getAttribute('data-price')) || 0;
+          grandTotal += (price * qty);
+        }
+      });
+
+      document.getElementById('formGrandTotal').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+    }
+
+    function openFormModal() {
+      document.getElementById('itemBoardContainer').innerHTML = '';
+      itemCardCounter = 0;
+      addItemBoard();
+      document.getElementById('formModal').classList.add('active');
+    }
+
+    function closeFormModal() {
+      document.getElementById('formModal').classList.remove('active');
+      document.getElementById('inputPlat').value = '';
+      document.getElementById('inputHp').value = '';
+    }
+
+    function submitTransaction() {
+      const plat = document.getElementById('inputPlat').value.toUpperCase() || 'KADA BA PLAT';
+      const hp = document.getElementById('inputHp').value || '-';
+
+      const cards = document.querySelectorAll('.notion-item-card');
+      let items = [];
+      let totalQty = 0;
+      let grandTotal = 0;
+
+      cards.forEach(card => {
+        const id = card.id.replace('itemBoard_', '');
+        const select = document.getElementById(`selectBan_${id}`);
+        const qty = parseInt(document.getElementById(`qtyVal_${id}`).innerText);
+
+        if (select && select.value !== '') {
+          const priceUnit = parseInt(select.options[select.selectedIndex].getAttribute('data-price')) || 0;
+          const totalPrice = priceUnit * qty;
+
+          items.push({
+            ban: select.value,
+            qty: qty,
+            price: totalPrice
+          });
+
+          totalQty += qty;
+          grandTotal += totalPrice;
+        }
+      });
+
+      if (items.length === 0) {
+        alert('Pilih minimal satu jenis ban!');
+        return;
+      }
+
+      const now = new Date();
+      const timeStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+      const newTx = {
+        id: Date.now(),
+        date: timeStr,
+        plat: plat,
+        hp: hp,
+        items: items,
+        total: grandTotal,
+        totalQty: totalQty
+      };
+
+      transactions.push(newTx);
+      renderApp();
+      closeFormModal();
+      showReceipt(newTx);
+    }
+
+    function showReceipt(tx) {
+      document.getElementById('receiptTime').innerText = tx.date;
+      document.getElementById('receiptPlat').innerText = tx.plat;
+      document.getElementById('receiptHp').innerText = tx.hp;
+
+      const receiptBanList = document.getElementById('receiptBanList');
+      receiptBanList.innerHTML = '';
+
+      tx.items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'receipt-row';
+        row.innerHTML = `
+          <span>${item.ban} (x${item.qty})</span>
+          <span>Rp ${Number(item.price).toLocaleString('id-ID')}</span>
+        `;
+        receiptBanList.appendChild(row);
+      });
+
+      document.getElementById('receiptTotal').innerText = `Rp ${Number(tx.total).toLocaleString('id-ID')}`;
+      document.getElementById('receiptModal').classList.add('active');
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').classList.remove('active');
+    }
+
+    function exportCSV() {
+      let csv = 'Tanggal,No Plat,No HP,Detail Barang,Total Pcs,Total Harga\n';
+      transactions.forEach(t => {
+        const detail = t.items.map(i => `${i.ban} (${i.qty}pcs)`).join(' | ');
+        csv += `"${t.date}","${t.plat}","${t.hp}","${detail}",${t.totalQty},${t.total}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'Laporan_Penjualan_Ban.csv');
+      a.click();
+    }
+
+    renderApp();
   </script>
 </body>
-  </html>
-      
+</html>
