@@ -229,14 +229,16 @@
     }
 
     .form-control {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      font-size: 14px;
-      outline: none;
-      background: #ffffff;
-    }
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: #ffffff;
+  color: #64748b; /* Warna teks abu-abu */
+}
+
 
     /* Grid layout */
     .grid-2-col {
@@ -704,9 +706,9 @@
       const ukList = [...new Set(filtered.map(i => i.ukuran))].sort();
       const prodList = [...new Set(filtered.map(i => i.namaProduk))].sort();
 
-      renderSelectOptions('filterKategori', katList, katVal, '-- Semua Kategori --');
-      renderSelectOptions('filterUkuran', ukList, ukVal, '-- Semua Ukuran --');
-      renderSelectOptions('filterProduk', prodList, prodVal, '-- Semua Produk --');
+      renderSelectOptions('filterKategori', katList, katVal, 'Kategori');
+      renderSelectOptions('filterUkuran', ukList, ukVal, 'Ukuran');
+      renderSelectOptions('filterProduk', prodList, prodVal, 'Produk');
     }
 
     function renderSelectOptions(elementId, list, currentValue, defaultLabel) {
