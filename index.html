@@ -103,7 +103,7 @@
       margin-top: 2px;
     }
 
-    /* Transaction Feed */
+    /* Content Area */
     .content-area {
       padding: 20px;
       flex: 1;
@@ -177,7 +177,7 @@
       gap: 8px;
     }
 
-    /* Modal Sheet Styling */
+    /* Modal Overlay */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -206,7 +206,7 @@
       border-top-left-radius: 20px;
       border-top-right-radius: 20px;
       padding: 24px;
-      max-height: 85vh;
+      max-height: 88vh;
       overflow-y: auto;
       transform: translateY(100%);
       transition: transform 0.3s ease;
@@ -238,14 +238,14 @@
       background: #ffffff;
     }
 
-    /* GRID BERDAMPINGAN NO PLAT & NO HP */
+    /* Grid layout */
     .grid-2-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
 
-    /* NOTION STYLE BOARD FOR ITEM INPUT */
+    /* Item Card */
     .notion-item-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -254,24 +254,38 @@
       margin-bottom: 10px;
     }
 
-    .notion-item-row {
+    .btn-select-trigger {
+      width: 100%;
+      padding: 10px 12px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      text-align: left;
+      font-size: 13px;
+      color: #0f172a;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .item-inputs-row {
       display: flex;
       gap: 8px;
       align-items: center;
     }
 
-    .notion-select {
+    .input-price-manual {
       flex: 1;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
-      padding: 10px;
+      padding: 8px 12px;
       font-size: 13px;
-      background: #ffffff;
-      color: #0f172a;
       outline: none;
     }
 
-    /* Stepper Button (< 1 >) */
+    /* Stepper Button */
     .stepper-box {
       display: flex;
       align-items: center;
@@ -295,12 +309,6 @@
       align-items: center;
       justify-content: center;
       user-select: none;
-      transition: transform 0.1s ease, background-color 0.15s ease;
-    }
-
-    .btn-step:active:not(:disabled) {
-      transform: scale(0.88);
-      background-color: #e2e8f0;
     }
 
     .btn-step:disabled {
@@ -316,7 +324,6 @@
       color: #0f172a;
     }
 
-    /* Sub-board Tambah Item */
     .btn-sub-board {
       width: 100%;
       background: #f1f5f9;
@@ -332,15 +339,8 @@
       justify-content: center;
       gap: 6px;
       margin-top: 6px;
-      transition: transform 0.1s ease, background 0.15s ease;
     }
 
-    .btn-sub-board:active {
-      transform: scale(0.98);
-      background: #e2e8f0;
-    }
-
-    /* Total Harga Card Box */
     .total-price-box {
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
@@ -362,7 +362,6 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 14px;
-      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
     }
 
     /* Modal Struk Nota */
@@ -481,17 +480,14 @@
       <!-- BOARD CONTAINER KELOMPOK BAN -->
       <div class="form-group">
         <label class="form-label">Daftar Barang</label>
-        <div id="itemBoardContainer">
-          <!-- Item Card akan ter-generate otomatis -->
-        </div>
+        <div id="itemBoardContainer"></div>
 
-        <!-- SUB BOARD TOMBOL TAMBAH ITEM -->
         <button class="btn-sub-board" onclick="addItemBoard()">
           <span>+</span> Tambahkan item
         </button>
       </div>
 
-      <!-- GRID BERDAMPINGAN: NO PLAT & NO HP -->
+      <!-- GRID NO PLAT & NO HP -->
       <div class="form-group grid-2-col">
         <div>
           <label class="form-label">No. Plat</label>
@@ -499,7 +495,6 @@
         </div>
         <div>
           <label class="form-label">No. Telepon</label>
-          <!-- KEYBOARD NOKIA / NUMPAD DENGAN inputmode="numeric" -->
           <input type="tel" inputmode="numeric" pattern="[0-9]*" class="form-control" id="inputHp" placeholder="085386379179">
         </div>
       </div>
@@ -516,6 +511,37 @@
       <!-- TOMBOL PAYMENT -->
       <button class="btn-submit" onclick="submitTransaction()">Proses Payment & Nota</button>
       <button onclick="closeFormModal()" style="width:100%; background:none; border:none; padding:12px; color:#64748b; margin-top:4px; font-weight:600;">Batal</button>
+    </div>
+  </div>
+
+  <!-- POP-UP MODAL CHOOSER (3 DROPDOWN FILTER BAN) -->
+  <div class="modal-overlay" id="pickerModal" style="z-index: 200;">
+    <div class="modal-sheet">
+      <h4 style="margin-bottom: 16px; color: #0f172a;">Pilih Spesifikasi Ban</h4>
+
+      <div class="form-group">
+        <label class="form-label">1. Kategori / Tipe Ban</label>
+        <select id="filterKategori" class="form-control" onchange="onFilterChange('kategori')">
+          <option value="">-- Semua Kategori --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">2. Ukuran / Ring</label>
+        <select id="filterUkuran" class="form-control" onchange="onFilterChange('ukuran')">
+          <option value="">-- Semua Ukuran --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">3. Merek / Nama Produk</label>
+        <select id="filterProduk" class="form-control" onchange="onFilterChange('produk')">
+          <option value="">-- Semua Produk --</option>
+        </select>
+      </div>
+
+      <button class="btn-submit" onclick="confirmProductSelection()" style="margin-top: 10px;">Pilih Ban Ini</button>
+      <button onclick="closePickerModal()" style="width:100%; background:none; border:none; padding:12px; color:#64748b; margin-top:4px; font-weight:600;">Batal</button>
     </div>
   </div>
 
@@ -539,9 +565,7 @@
         </div>
         
         <div class="receipt-divider"></div>
-
         <div id="receiptBanList"></div>
-
         <div class="receipt-divider"></div>
 
         <div class="receipt-row bold">
@@ -555,22 +579,32 @@
   </div>
 
   <script>
-    const BAN_DATABASE = [
-      { name: '110/70-14 IRC SCT-005F TL', price: 750000 },
-      { name: '140/70-14 IRC SCT-005R TL', price: 470000 },
-      { name: '80/90-14 SS560F TT IRC', price: 195000 },
-      { name: '110/70-13 Exato IRC', price: 325000 },
-      { name: '130/70-13 Exato IRC', price: 400000 },
-      { name: '100/90-12 MDB86 IRC', price: 265000 },
-      { name: '90/90-14 SS-530R IRC', price: 235000 },
-      { name: '130/70-13 SCT007', price: 400000 },
-      { name: '140/70-14 SCT005R', price: 470000 }
-    ];
+    let masterBan = [];
+    let currentTargetCardId = null;
+
+    // Load CSV
+    async function loadCSV() {
+      try {
+        const response = await fetch('MConverter.csv');
+        const csvText = await response.text();
+        const rows = csvText.trim().split('\n').slice(1);
+        
+        masterBan = rows.map(row => {
+          const cols = row.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+          return {
+            kategori: cols[0] || '',
+            ukuran: cols[1] || '',
+            namaProduk: cols[2] || '',
+            hargaHET: cols[3] || '0'
+          };
+        });
+      } catch (e) {
+        console.error('Gagal membaca MConverter.csv:', e);
+      }
+    }
 
     let transactions = JSON.parse(localStorage.getItem('ban_transactions')) || [
-      { id: 1, date: '05/08/2026 14:10', plat: 'KH 2163 MJ', hp: '085386379179', items: [{ ban: '110/70-14 IRC SCT-005F TL', qty: 1, price: 750000 }], total: 750000, totalQty: 1 },
-      { id: 2, date: '05/08/2026 14:15', plat: 'KH 4859 MH', hp: '082259531811', items: [{ ban: '110/70-13 Exato IRC', qty: 1, price: 195000 }], total: 195000, totalQty: 1 },
-      { id: 3, date: '05/08/2026 14:20', plat: 'DA 4979 MI', hp: '085355698070', items: [{ ban: '130/70-13 SCT007', qty: 1, price: 400000 }], total: 400000, totalQty: 1 }
+      { id: 1, date: '05/08/2026 14:10', plat: 'KH 2163 MJ', hp: '085386379179', items: [{ ban: 'MB 520 z TL (100/90-10)', qty: 1, price: 322000 }], total: 322000, totalQty: 1 }
     ];
 
     let itemCardCounter = 0;
@@ -620,17 +654,15 @@
       card.className = 'notion-item-card';
       card.id = `itemBoard_${id}`;
 
-      let optionsHTML = '<option value="">-- Pilih Jenis Ban --</option>';
-      BAN_DATABASE.forEach(b => {
-        optionsHTML += `<option value="${b.name}" data-price="${b.price}">${b.name}</option>`;
-      });
-
       card.innerHTML = `
-        <div class="notion-item-row">
-          <select class="notion-select" id="selectBan_${id}" onchange="updateFormTotal()">
-            ${optionsHTML}
-          </select>
+        <button type="button" class="btn-select-trigger" onclick="openPickerModal(${id})">
+          <span id="btnText_${id}">-- Pilih Jenis Ban --</span>
+          <span style="font-size: 10px; color: #64748b;">▼</span>
+        </button>
+        <input type="hidden" id="selectedBanValue_${id}" value="">
 
+        <div class="item-inputs-row">
+          <input type="number" class="input-price-manual" id="inputHarga_${id}" placeholder="Harga (Rp)" oninput="updateFormTotal()">
           <div class="stepper-box">
             <button class="btn-step" id="btnMinus_${id}" onclick="changeQty(${id}, -1)" disabled>&lt;</button>
             <span class="step-val" id="qtyVal_${id}">1</span>
@@ -640,6 +672,80 @@
       `;
 
       document.getElementById('itemBoardContainer').appendChild(card);
+      updateFormTotal();
+    }
+
+    function openPickerModal(cardId) {
+      currentTargetCardId = cardId;
+      document.getElementById('filterKategori').value = '';
+      document.getElementById('filterUkuran').value = '';
+      document.getElementById('filterProduk').value = '';
+      populatePickerDropdowns();
+      document.getElementById('pickerModal').classList.add('active');
+    }
+
+    function closePickerModal() {
+      document.getElementById('pickerModal').classList.remove('active');
+    }
+
+    function populatePickerDropdowns() {
+      const katVal = document.getElementById('filterKategori').value;
+      const ukVal = document.getElementById('filterUkuran').value;
+      const prodVal = document.getElementById('filterProduk').value;
+
+      const filtered = masterBan.filter(item => {
+        const matchKat = !katVal || item.kategori === katVal;
+        const matchUk = !ukVal || item.ukuran === ukVal;
+        const matchProd = !prodVal || item.namaProduk === prodVal;
+        return matchKat && matchUk && matchProd;
+      });
+
+      const katList = [...new Set(filtered.map(i => i.kategori))].sort();
+      const ukList = [...new Set(filtered.map(i => i.ukuran))].sort();
+      const prodList = [...new Set(filtered.map(i => i.namaProduk))].sort();
+
+      renderSelectOptions('filterKategori', katList, katVal, '-- Semua Kategori --');
+      renderSelectOptions('filterUkuran', ukList, ukVal, '-- Semua Ukuran --');
+      renderSelectOptions('filterProduk', prodList, prodVal, '-- Semua Produk --');
+    }
+
+    function renderSelectOptions(elementId, list, currentValue, defaultLabel) {
+      const el = document.getElementById(elementId);
+      el.innerHTML = `<option value="">${defaultLabel}</option>`;
+      list.forEach(val => {
+        if (val) {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = val;
+          if (val === currentValue) opt.selected = true;
+          el.appendChild(opt);
+        }
+      });
+    }
+
+    function onFilterChange(source) {
+      populatePickerDropdowns();
+    }
+
+    function confirmProductSelection() {
+      const katVal = document.getElementById('filterKategori').value;
+      const ukVal = document.getElementById('filterUkuran').value;
+      const prodVal = document.getElementById('filterProduk').value;
+
+      let displayText = '';
+      if (prodVal) displayText += prodVal;
+      if (ukVal) displayText += (displayText ? ` (${ukVal})` : ukVal);
+      if (katVal) displayText += (displayText ? ` - ${katVal}` : katVal);
+
+      if (!displayText) {
+        alert('Pilih setidaknya salah satu filter (Ukuran, Produk, atau Kategori)!');
+        return;
+      }
+
+      document.getElementById(`btnText_${currentTargetCardId}`).innerText = displayText;
+      document.getElementById(`selectedBanValue_${currentTargetCardId}`).value = displayText;
+
+      closePickerModal();
       updateFormTotal();
     }
 
@@ -665,12 +771,12 @@
 
       cards.forEach(card => {
         const id = card.id.replace('itemBoard_', '');
-        const select = document.getElementById(`selectBan_${id}`);
-        const qty = parseInt(document.getElementById(`qtyVal_${id}`).innerText);
+        const banVal = document.getElementById(`selectedBanValue_${id}`).value;
+        const hargaVal = parseFloat(document.getElementById(`inputHarga_${id}`).value) || 0;
+        const qty = parseInt(document.getElementById(`qtyVal_${id}`).innerText) || 1;
 
-        if (select && select.selectedIndex > 0) {
-          const price = parseInt(select.options[select.selectedIndex].getAttribute('data-price')) || 0;
-          grandTotal += (price * qty);
+        if (banVal && hargaVal > 0) {
+          grandTotal += (hargaVal * qty);
         }
       });
 
@@ -701,15 +807,14 @@
 
       cards.forEach(card => {
         const id = card.id.replace('itemBoard_', '');
-        const select = document.getElementById(`selectBan_${id}`);
-        const qty = parseInt(document.getElementById(`qtyVal_${id}`).innerText);
+        const banVal = document.getElementById(`selectedBanValue_${id}`).value;
+        const hargaVal = parseFloat(document.getElementById(`inputHarga_${id}`).value) || 0;
+        const qty = parseInt(document.getElementById(`qtyVal_${id}`).innerText) || 1;
 
-        if (select && select.value !== '') {
-          const priceUnit = parseInt(select.options[select.selectedIndex].getAttribute('data-price')) || 0;
-          const totalPrice = priceUnit * qty;
-
+        if (banVal !== '') {
+          const totalPrice = hargaVal * qty;
           items.push({
-            ban: select.value,
+            ban: banVal,
             qty: qty,
             price: totalPrice
           });
@@ -783,6 +888,8 @@
       a.click();
     }
 
+    // Inisialisasi
+    loadCSV();
     renderApp();
   </script>
 </body>
