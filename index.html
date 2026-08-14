@@ -1004,17 +1004,22 @@
   });
 
   try {
-    // Menyiapkan format payload data sesuai header Google Sheet
-    const payload = transactions.map(t => ({
-      date: t.date,
-      plat: t.plat,
-      hp: t.hp,
-      detail: t.items.map(i => `${i.ban} (${i.qty}pcs)`).join(' | '),
-      totalQty: t.totalQty,
-      total: t.total
-    }));
+    // Breakdown setiap item dalam transaksi menjadi baris terpisah
+    const payload = [];
+    transactions.forEach(t => {
+      t.items.forEach(item => {
+        payload.push({
+          date: t.date,
+          plat: t.plat,
+          hp: t.hp,
+          detail: item.ban,                 // Nama barang saja
+          totalQty: item.qty,               // Qty per barang
+          total: item.price * item.qty      // Total harga per barang
+        });
+      });
+    });
 
-    // Kirim data ke Google Sheets secara otomatis
+    // Kirim data yang sudah di-breakdown ke Google Sheets
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -1039,7 +1044,7 @@
     console.error('Gagal export:', error);
     alert('Gagal mengirim data. Pastikan koneksi internet tersedia.');
   }
-}
+    }
 
     // Inisialisasi
     loadCSV();
