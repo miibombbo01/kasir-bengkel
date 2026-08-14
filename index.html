@@ -470,6 +470,39 @@
       font-weight: 600;
       cursor: pointer;
     }
+
+    /* Style Tombol Reset Bulanan */
+.btn-reset-monthly {
+  background: transparent;
+  border: 1px dashed #ef4444;
+  color: #ef4444;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-monthly:hover {
+  background: #fef2f2;
+}
+
+/* Animasi Warning Peringatan */
+.warning-icon {
+  width: 48px;
+  height: 48px;
+  background: #fef2f2;
+  color: #ef4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  margin: 0 auto 12px auto;
+  border: 2px solid #fecaca;
+}
   </style>
 </head>
 <body>
@@ -505,9 +538,12 @@
 
     <!-- Riwayat Transaksi -->
     <div class="content-area">
-      <div class="section-title">
+            <div class="section-title">
         <span>Riwayat Transaksi</span>
-        <button onclick="exportCSV()" style="font-size: 11px; background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer;">Export Excel</button>
+        <div style="display: flex; gap: 6px;">
+          <button onclick="openResetMonthlyModal()" class="btn-reset-monthly">Reset Bulan</button>
+          <button onclick="exportCSV()" style="font-size: 11px; background: #e2e8f0; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-weight: 600;">Export Excel</button>
+        </div>
       </div>
       <div id="txList"></div>
     </div>
@@ -1083,6 +1119,40 @@
       transactions = transactions.filter(t => t.id !== id);
       updateFormTotal();
     }
+
+    // Buka Modal Reset & Picu Getar HP (Vibration API)
+function openResetMonthlyModal() {
+  // Pemicu Getar HP (pola: getar 100ms, henti 50ms, getar 100ms)
+  if ("vibrate" in navigator) {
+    navigator.vibrate([100, 50, 100]);
+  }
+  
+  document.getElementById('resetMonthlyModal').classList.add('active');
+}
+
+// Tutup Modal Reset
+function closeResetMonthlyModal() {
+  document.getElementById('resetMonthlyModal').classList.remove('active');
+}
+
+// Eksekusi Reset Bulanan
+function executeResetMonthly() {
+  // Hapus semua memori akumulasi & transaksi
+  localStorage.removeItem('exported_pcs');
+  localStorage.removeItem('exported_omzet');
+  localStorage.removeItem('ban_transactions');
+  transactions = [];
+
+  renderApp();
+  closeResetMonthlyModal();
+
+  // Getar panjang penanda berhasil
+  if ("vibrate" in navigator) {
+    navigator.vibrate(200);
+  }
+
+  alert('Progress Bar dan Total Omzet berhasil di-reset ke 0 untuk awal bulan!');
+}
   </script>
 
    <!-- MODAL KONFIRMASI HAPUS CUSTOM -->
@@ -1097,5 +1167,21 @@
       </div>
     </div>
   </div> 
+
+    <!-- MODAL WARNING RESET BULANAN -->
+  <div class="modal-overlay" id="resetMonthlyModal" style="align-items: center; z-index: 400;">
+    <div class="receipt-card" style="max-width: 320px; padding: 20px; text-align: center;">
+      <div class="warning-icon">⚠️</div>
+      <h3 style="color: #0f172a; font-size: 16px; margin-bottom: 8px;">Reset Target Bulanan?</h3>
+      <p style="color: #64748b; font-size: 13px; margin-bottom: 20px; line-height: 1.4;">
+        Tindakan ini akan <strong>menghapus akumulasi Progress Bar dan Total Omzet</strong> kembali ke 0 untuk bulan baru.
+      </p>
+      
+      <div style="display: flex; gap: 10px;">
+        <button onclick="closeResetMonthlyModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;">Batal</button>
+        <button onclick="executeResetMonthly()" style="flex: 1; background: #ef4444; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;">Reset Ke 0</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
