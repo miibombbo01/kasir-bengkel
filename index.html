@@ -687,7 +687,7 @@
               <button class="btn-three-dots" onclick="toggleActionMenu(event, ${tx.id})">⋮</button>
               <div id="actionMenu_${tx.id}" class="dropdown-action-menu">
                 <button class="btn-edit" onclick="editTransaction(${tx.id})">Edit</button>
-                <button class="btn-delete" onclick="deleteTransaction(${tx.id})">Hapus</button>
+                <button class="btn-delete" onclick="deleteTransaction(event, ${tx.id})">Hapus</button>
               </div>
             </div>
           </div>
@@ -969,8 +969,10 @@
       document.querySelectorAll('.dropdown-action-menu').forEach(menu => menu.classList.remove('show'));
     };
 
-    // Fungsi Hapus
-    function deleteTransaction(id) {
+    // Fungsi Hapus (dengan e.stopPropagation agar tidak mentrigger modal struk)
+    function deleteTransaction(e, id) {
+      if (e) e.stopPropagation(); // Mencegah modal struk terbuka
+      
       if (confirm('Yakin mau menghapus transaksi ini?')) {
         transactions = transactions.filter(t => t.id !== id);
         renderApp();
