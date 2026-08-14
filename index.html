@@ -658,52 +658,62 @@
     let itemCardCounter = 0;
 
     function renderApp() {
-      const txList = document.getElementById('txList');
-      txList.innerHTML = '';
+  const txList = document.getElementById('txList');
+  txList.innerHTML = '';
 
-      let totalPcs = 0;
-      let totalOmzet = 0;
+  // Hitung total dari transaksi yang sedang aktif di layar
+  let currentPcs = 0;
+  let currentOmzet = 0;
 
-      transactions.forEach(tx => {
-        totalPcs += Number(tx.totalQty);
-        totalOmzet += Number(tx.total);
+  transactions.forEach(tx => {
+    currentPcs += Number(tx.totalQty);
+    currentOmzet += Number(tx.total);
 
-        const card = document.createElement('div');
-        card.className = 'tx-card';
-        card.onclick = () => showReceipt(tx);
+    const summaryText = tx.items.map(i => `${i.ban} (x${i.qty})`).join(', ');
+
+    const card = document.createElement('div');
+    card.className = 'tx-card';
+    card.innerHTML = `
+      <div class="tx-details" onclick="showReceipt(transactions[${transactions.indexOf(tx)}])">
+        <h4>${tx.plat} (${tx.totalQty} Pcs)</h4>
+        <p>${summaryText}</p>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <div class="tx-price" onclick="showReceipt(transactions[${transactions.indexOf(tx)}])">
+          Rp ${Number(tx.total).toLocaleString('id-ID')}
+        </div>
         
-        const summaryText = tx.items.map(i => `${i.ban} (x${i.qty})`).join(', ');
-
-          card.innerHTML = `
-          <div class="tx-details" onclick="showReceipt(transactions[${transactions.indexOf(tx)}])">
-            <h4>${tx.plat} (${tx.totalQty} Pcs)</h4>
-            <p>${summaryText}</p>
+        <!-- Menu Titik 3 -->
+        <div class="action-menu-container">
+          <button class="btn-three-dots" onclick="toggleActionMenu(event, ${tx.id})">⋮</button>
+          <div id="actionMenu_${tx.id}" class="dropdown-action-menu">
+            <button class="btn-edit" onclick="editTransaction(${tx.id})">Edit</button>
+            <button class="btn-delete" onclick="deleteTransaction(event, ${tx.id})">Hapus</button>
           </div>
-          <div style="display: flex; align-items: center;">
-            <div class="tx-price" onclick="showReceipt(transactions[${transactions.indexOf(tx)}])">Rp ${Number(tx.total).toLocaleString('id-ID')}</div>
-            
-            <!-- Menu Titik 3 -->
-            <div class="action-menu-container">
-              <button class="btn-three-dots" onclick="toggleActionMenu(event, ${tx.id})">⋮</button>
-              <div id="actionMenu_${tx.id}" class="dropdown-action-menu">
-                <button class="btn-edit" onclick="editTransaction(${tx.id})">Edit</button>
-                <button class="btn-delete" onclick="deleteTransaction(event, ${tx.id})">Hapus</button>
-              </div>
-            </div>
-          </div>
-        `;
-        txList.prepend(card);
-      });
+        </div>
+      </div>
+    `;
+    txList.prepend(card);
+  });
 
-      document.getElementById('targetText').innerText = `${totalPcs} / 300 Pcs`;
-      const targetPercent = Math.min((totalPcs / 300) * 100, 100);
-      document.getElementById('progressBar').style.width = `${targetPercent}%`;
+  // Ambil data akumulasi lama yang sudah di-export
+  let exportedPcs = parseInt(localStorage.getItem('exported_pcs')) || 0;
+  let exportedOmzet = parseInt(localStorage.getItem('exported_omzet')) || 0;
 
-      document.getElementById('todayPcs').innerText = `${totalPcs} Pcs`;
-      document.getElementById('todayOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
+  // Total Keseluruhan (Aktif + Yang Sudah Di-export)
+  let grandTotalPcs = currentPcs + exportedPcs;
+  let grandTotalOmzet = currentOmzet + exportedOmzet;
 
-      localStorage.setItem('ban_transactions', JSON.stringify(transactions));
-    }
+  // Update Tampilan Progress Bar & Omzet
+  document.getElementById('targetText').innerText = `${grandTotalPcs} / 300 Pcs`;
+  const targetPercent = Math.min((grandTotalPcs / 300) * 100, 100);
+  document.getElementById('progressBar').style.width = `${targetPercent}%`;
+
+  document.getElementById('todayPcs').innerText = `${grandTotalPcs} Pcs`;
+  document.getElementById('todayOmzet').innerText = `Rp ${grandTotalOmzet.toLocaleString('id-ID')}`;
+
+  localStorage.setItem('ban_transactions', JSON.stringify(transactions));
+}
 
     function addItemBoard() {
       itemCardCounter++;
@@ -936,19 +946,66 @@
       document.getElementById('receiptModal').classList.remove('active');
     }
 
-    function exportCSV() {
-      let csv = 'Tanggal,No Plat,No HP,Detail Barang,Total Pcs,Total Harga\n';
-      transactions.forEach(t => {
-        const detail = t.items.map(i => `${i.ban} (${i.qty}pcs)`).join(' | ');
-        csv += `"${t.date}","${t.plat}","${t.hp}","${detail}",${t.totalQty},${t.total}\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('href', url);
-      a.setAttribute('download', 'Laporan_Penjualan_Ban.csv');
-      a.click();
-    }
+    async function exportCSV() {
+  if (transactions.length === 0) {
+    alert('Tidak ada transaksi yang bisa di-export!');
+    return;
+  }
+
+  if (!confirm('Kirim laporan ke Google Sheets & bersihkan riwayat transaksi?')) {
+    return;
+  }
+
+  // URL Web App Apps Script milikmu (Ganti dengan URL dari Apps Script kamu nanti)
+  const SCRIPT_URL = "URL_GOOGLE_APPS_SCRIPT_KAMU_DI_SINI";
+
+  // Hitung total Pcs dan Omzet dari transaksi aktif saat ini untuk disimpan ke akumulasi
+  let sessionPcs = 0;
+  let sessionOmzet = 0;
+  transactions.forEach(t => {
+    sessionPcs += Number(t.totalQty);
+    sessionOmzet += Number(t.total);
+  });
+
+  try {
+    // Menyiapkan format payload data
+    const payload = transactions.map(t => ({
+      date: t.date,
+      plat: t.plat,
+      hp: t.hp,
+      detail: t.items.map(i => `${i.ban} (${i.qty}pcs)`).join(' | '),
+      totalQty: t.totalQty,
+      total: t.total
+    }));
+
+    // Kirim data ke Google Sheets secara background
+    /*
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    */
+
+    // Simpan hitungan ke memori akumulasi agar Progress Bar tidak kembali ke 0
+    let currentExportedPcs = parseInt(localStorage.getItem('exported_pcs')) || 0;
+    let currentExportedOmzet = parseInt(localStorage.getItem('exported_omzet')) || 0;
+    
+    localStorage.setItem('exported_pcs', currentExportedPcs + sessionPcs);
+    localStorage.setItem('exported_omzet', currentExportedOmzet + sessionOmzet);
+
+    // Kosongkan riwayat transaksi aktif
+    transactions = [];
+    renderApp();
+
+    alert('Laporan berhasil dikirim dan riwayat transaksi telah dibersihkan!');
+
+  } catch (error) {
+    console.error('Gagal export:', error);
+    alert('Gagal mengirim data. Pastikan koneksi internet tersedia.');
+  }
+}
 
     // Inisialisasi
     loadCSV();
