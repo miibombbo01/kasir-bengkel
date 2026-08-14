@@ -992,10 +992,10 @@
     return;
   }
 
-  // URL Web App Apps Script milikmu (Ganti dengan URL dari Apps Script kamu nanti)
-  const SCRIPT_URL = "URL_GOOGLE_APPS_SCRIPT_KAMU_DI_SINI";
+  // URL Apps Script kamu
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6ix2J-h0szylDG8sRmJ95u_Si28tGDU7odW50WnoYyIMx1dQsIPqC5pZLhXomnIHr/exec";
 
-  // Hitung total Pcs dan Omzet dari transaksi aktif saat ini untuk disimpan ke akumulasi
+  // Hitung total Pcs dan Omzet dari transaksi saat ini
   let sessionPcs = 0;
   let sessionOmzet = 0;
   transactions.forEach(t => {
@@ -1004,7 +1004,7 @@
   });
 
   try {
-    // Menyiapkan format payload data
+    // Menyiapkan format payload data sesuai header Google Sheet
     const payload = transactions.map(t => ({
       date: t.date,
       plat: t.plat,
@@ -1014,28 +1014,26 @@
       total: t.total
     }));
 
-    // Kirim data ke Google Sheets secara background
-    /*
+    // Kirim data ke Google Sheets secara otomatis
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    */
 
-    // Simpan hitungan ke memori akumulasi agar Progress Bar tidak kembali ke 0
+    // Simpan hitungan ke memori akumulasi agar Progress Bar TETAP BERJALAN
     let currentExportedPcs = parseInt(localStorage.getItem('exported_pcs')) || 0;
     let currentExportedOmzet = parseInt(localStorage.getItem('exported_omzet')) || 0;
     
     localStorage.setItem('exported_pcs', currentExportedPcs + sessionPcs);
     localStorage.setItem('exported_omzet', currentExportedOmzet + sessionOmzet);
 
-    // Kosongkan riwayat transaksi aktif
+    // Kosongkan riwayat transaksi aktif di layar
     transactions = [];
     renderApp();
 
-    alert('Laporan berhasil dikirim dan riwayat transaksi telah dibersihkan!');
+    alert('Laporan berhasil dikirim ke Google Sheets dan riwayat transaksi telah dibersihkan!');
 
   } catch (error) {
     console.error('Gagal export:', error);
