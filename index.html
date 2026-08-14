@@ -120,7 +120,7 @@
       align-items: center;
     }
 
-    .tx-card {
+        .tx-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 12px;
@@ -129,8 +129,54 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
+    }
+
+    /* Style Menu Titik 3 */
+    .action-menu-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .btn-three-dots {
+      background: none;
+      border: none;
+      font-size: 18px;
+      font-weight: bold;
+      color: #64748b;
+      cursor: pointer;
+      padding: 4px 8px;
+      margin-left: 6px;
+    }
+
+    .dropdown-action-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 28px;
+      background-color: #ffffff;
+      min-width: 100px;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      z-index: 50;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+
+    .dropdown-action-menu button {
+      width: 100%;
+      padding: 8px 12px;
+      text-align: left;
+      background: none;
+      border: none;
+      font-size: 13px;
       cursor: pointer;
     }
+
+    .dropdown-action-menu button.btn-edit { color: #2563eb; }
+    .dropdown-action-menu button.btn-delete { color: #ef4444; }
+    .dropdown-action-menu button:hover { background-color: #f1f5f9; }
+    .dropdown-action-menu.show { display: block; }
 
     .tx-details h4 {
       font-size: 14px;
@@ -628,12 +674,23 @@
         
         const summaryText = tx.items.map(i => `${i.ban} (x${i.qty})`).join(', ');
 
-        card.innerHTML = `
-          <div class="tx-details">
+          card.innerHTML = `
+          <div class="tx-details" onclick="showReceipt(transactions[${transactions.indexOf(tx)}])">
             <h4>${tx.plat} (${tx.totalQty} Pcs)</h4>
             <p>${summaryText}</p>
           </div>
-          <div class="tx-price">Rp ${Number(tx.total).toLocaleString('id-ID')}</div>
+          <div style="display: flex; align-items: center;">
+            <div class="tx-price" onclick="showReceipt(transactions[${transactions.indexOf(tx)}])">Rp ${Number(tx.total).toLocaleString('id-ID')}</div>
+            
+            <!-- Menu Titik 3 -->
+            <div class="action-menu-container">
+              <button class="btn-three-dots" onclick="toggleActionMenu(event, ${tx.id})">⋮</button>
+              <div id="actionMenu_${tx.id}" class="dropdown-action-menu">
+                <button class="btn-edit" onclick="editTransaction(${tx.id})">Edit</button>
+                <button class="btn-delete" onclick="deleteTransaction(${tx.id})">Hapus</button>
+              </div>
+            </div>
+          </div>
         `;
         txList.prepend(card);
       });
@@ -656,19 +713,22 @@
       card.className = 'notion-item-card';
       card.id = `itemBoard_${id}`;
 
-      card.innerHTML = `
-        <button type="button" class="btn-select-trigger" onclick="openPickerModal(${id})">
-          <span id="btnText_${id}">Pilih Jenis Ban</span>
-          <span style="font-size: 10px; color: #64748b;">▼</span>
-        </button>
-        <input type="hidden" id="selectedBanValue_${id}" value="">
+            card.innerHTML = `
+        <input 
+          type="text" 
+          class="form-control" 
+          id="inputNama_${id}" 
+          placeholder="Nama / Ukuran Ban (misal: FASTI PRO 100/80-14)"
+          style="margin-bottom: 8px;"
+          oninput="updateFormTotal()"
+        >
 
         <div class="item-inputs-row">
           <input type="number" class="input-price-manual" id="inputHarga_${id}" placeholder="Harga (Rp)" oninput="updateFormTotal()">
           <div class="stepper-box">
-            <button class="btn-step" id="btnMinus_${id}" onclick="changeQty(${id}, -1)" disabled>&lt;</button>
+            <button type="button" class="btn-step" id="btnMinus_${id}" onclick="changeQty(${id}, -1)" disabled>&lt;</button>
             <span class="step-val" id="qtyVal_${id}">1</span>
-            <button class="btn-step" id="btnPlus_${id}" onclick="changeQty(${id}, 1)">&gt;</button>
+            <button type="button" class="btn-step" id="btnPlus_${id}" onclick="changeQty(${id}, 1)">&gt;</button>
           </div>
         </div>
       `;
@@ -773,7 +833,7 @@
 
       cards.forEach(card => {
         const id = card.id.replace('itemBoard_', '');
-        const banVal = document.getElementById(`selectedBanValue_${id}`).value;
+        const banVal = document.getElementById(`inputNama_${id}`) ? document.getElementById(`inputNama_${id}`).value : '';
         const hargaVal = parseFloat(document.getElementById(`inputHarga_${id}`).value) || 0;
         const qty = parseInt(document.getElementById(`qtyVal_${id}`).innerText) || 1;
 
@@ -809,7 +869,7 @@
 
       cards.forEach(card => {
         const id = card.id.replace('itemBoard_', '');
-        const banVal = document.getElementById(`selectedBanValue_${id}`).value;
+        const banVal = document.getElementById(`inputNama_${id}`) ? document.getElementById(`inputNama_${id}`).value : '';
         const hargaVal = parseFloat(document.getElementById(`inputHarga_${id}`).value) || 0;
         const qty = parseInt(document.getElementById(`qtyVal_${id}`).innerText) || 1;
 
@@ -893,6 +953,62 @@
     // Inisialisasi
     loadCSV();
     renderApp();
+
+        // Toggle Menu Titik 3
+    function toggleActionMenu(event, id) {
+      event.stopPropagation();
+      document.querySelectorAll('.dropdown-action-menu').forEach(menu => {
+        if (menu.id !== `actionMenu_${id}`) menu.classList.remove('show');
+      });
+      const targetMenu = document.getElementById(`actionMenu_${id}`);
+      if (targetMenu) targetMenu.classList.toggle('show');
+    }
+
+    // Tutup menu jika klik luar
+    window.onclick = function() {
+      document.querySelectorAll('.dropdown-action-menu').forEach(menu => menu.classList.remove('show'));
+    };
+
+    // Fungsi Hapus
+    function deleteTransaction(id) {
+      if (confirm('Yakin mau menghapus transaksi ini?')) {
+        transactions = transactions.filter(t => t.id !== id);
+        renderApp();
+      }
+    }
+
+    // Fungsi Edit
+    function editTransaction(id) {
+      const tx = transactions.find(t => t.id === id);
+      if (!tx) return;
+
+      // Buka Form
+      openFormModal();
+
+      // Isi Plat & HP
+      document.getElementById('inputPlat').value = tx.plat === 'KADA BA PLAT' ? '' : tx.plat;
+      document.getElementById('inputHp').value = tx.hp === '-' ? '' : tx.hp;
+
+      // Isi Items
+      document.getElementById('itemBoardContainer').innerHTML = '';
+      itemCardCounter = 0;
+
+      tx.items.forEach(item => {
+        addItemBoard();
+        const currentId = itemCardCounter;
+        document.getElementById(`inputNama_${currentId}`).value = item.ban;
+        
+        // Hitung harga satuan awal
+        const unitPrice = item.price / item.qty;
+        document.getElementById(`inputHarga_${currentId}`).value = unitPrice;
+        
+        document.getElementById(`qtyVal_${currentId}`).innerText = item.qty;
+      });
+
+      // Hapus transaksi lama dari list
+      transactions = transactions.filter(t => t.id !== id);
+      updateFormTotal();
+    }
   </script>
 </body>
 </html>
