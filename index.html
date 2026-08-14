@@ -970,12 +970,27 @@
     };
 
     // Fungsi Hapus (dengan e.stopPropagation agar tidak mentrigger modal struk)
+        let deleteTargetId = null;
+
+    // 1. Membuka Custom Modal Hapus (Mencegah modal struk terbuka)
     function deleteTransaction(e, id) {
-      if (e) e.stopPropagation(); // Mencegah modal struk terbuka
-      
-      if (confirm('Yakin mau menghapus transaksi ini?')) {
-        transactions = transactions.filter(t => t.id !== id);
+      if (e) e.stopPropagation();
+      deleteTargetId = id;
+      document.getElementById('deleteConfirmModal').classList.add('active');
+    }
+
+    // 2. Menutup Custom Modal Hapus
+    function closeDeleteModal() {
+      deleteTargetId = null;
+      document.getElementById('deleteConfirmModal').classList.remove('active');
+    }
+
+    // 3. Eksekusi Hapus Saat Tombol 'Hapus' Ditekan
+    function executeDelete() {
+      if (deleteTargetId !== null) {
+        transactions = transactions.filter(t => t.id !== deleteTargetId);
         renderApp();
+        closeDeleteModal();
       }
     }
 
@@ -1012,5 +1027,18 @@
       updateFormTotal();
     }
   </script>
+
+   <!-- MODAL KONFIRMASI HAPUS CUSTOM -->
+  <div class="modal-overlay" id="deleteConfirmModal" style="align-items: center; z-index: 300;">
+    <div class="receipt-card" style="max-width: 320px; padding: 20px;">
+      <h3 style="color: #0f172a; font-size: 16px; margin-bottom: 12px;">Konfirmasi Hapus</h3>
+      <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Yakin mau menghapus transaksi ini?</p>
+      
+      <div style="display: flex; gap: 10px;">
+        <button onclick="closeDeleteModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;">Batal</button>
+        <button onclick="executeDelete()" style="flex: 1; background: #ef4444; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;">Hapus</button>
+      </div>
+    </div>
+  </div> 
 </body>
 </html>
